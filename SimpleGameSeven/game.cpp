@@ -10,6 +10,9 @@ Game::Game()
 {
 	m_isGameActive = true;
 	m_clockLastFrame = 0;
+	m_frameTime = 0.0;
+	m_frameCount = 0;
+	m_FPS = 0;
 
 	for (int i = 0; i < gameObjectsCountMax; i++)
 		m_objects[i] = 0;
@@ -73,6 +76,16 @@ bool Game::frame()
 	float deltaTime = float(deltaClock) / CLOCKS_PER_SEC;
 	m_clockLastFrame = clockNow;
 
+	// Расчёт FPS
+	m_frameTime += deltaTime;
+	m_frameCount++;
+	if (m_frameTime >= 1.0)
+	{
+		m_frameTime = 0;
+		m_FPS = m_frameCount;
+		m_frameCount = 0;
+	}
+
 	render();
 	update(deltaTime);
 
@@ -107,6 +120,10 @@ void Game::render()
 	char buff[64];
 	sprintf_s(buff, "Objects: %d", objectsCount);
 	m_renderSystem.drawText(0, 0, buff, ConsoleColor_Gray, ConsoleColor_Black);
+
+	// Вывод счётчика кадров
+	sprintf_s(buff, "FPS: %i", m_FPS);
+	m_renderSystem.drawText(0, 16, buff, ConsoleColor_Gray, ConsoleColor_Black);
 
 	// Конец кадра
 	m_renderSystem.flush();

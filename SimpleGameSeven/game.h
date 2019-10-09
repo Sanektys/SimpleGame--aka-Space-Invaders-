@@ -29,6 +29,9 @@ private:
 private:
 	bool m_isGameActive;
 	clock_t m_clockLastFrame;
+	float m_frameTime;
+	int m_frameCount;
+	int m_FPS;
 
 	RenderSystem m_renderSystem;
 
