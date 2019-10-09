@@ -1,0 +1,12 @@
+Debug/
+Release/
+!Release/*.exe
+SimpleGameSeven/Debug/
+SimpleGameSeven/Release/
+SimpleGameSeven/*.vcxproj
+SimpleGameSeven/*.filters
+SimpleGameSeven/*.user
+*.ipch
+.vs/SimpleGameSeven/v16/.suo
+*.db
+*.opendb
