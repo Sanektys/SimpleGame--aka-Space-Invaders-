@@ -45,7 +45,7 @@ void Game::initialize()
 				// Инициализация корабля
 				case CellSymbol_Ship:
 				{
-					createObject(GameObjectType_Ship, (c + 0.5), r,
+					createObject(GameObjectType::Ship, (c + 0.5), r,
 									GetRenderCellSymbol(cellSymbol),
 									GetRenderCellSymbolColor(cellSymbol),
 									GetRenderCellSymbolBackgroundColor(cellSymbol));
@@ -55,7 +55,7 @@ void Game::initialize()
 				//
 				case CellSymbol_Alien:
 				{
-					GameObject* alien = createObject(GameObjectType_Alien, (c + 0.5), r,
+					GameObject* alien = createObject(GameObjectType::Alien, (c + 0.5), r,
 														GetRenderCellSymbol(cellSymbol),
 														GetRenderCellSymbolColor(cellSymbol),
 														GetRenderCellSymbolBackgroundColor(cellSymbol));
@@ -119,11 +119,11 @@ void Game::render()
 	// Вывод счётчика объектов
 	char buff[64];
 	sprintf_s(buff, "Objects: %d", objectsCount);
-	m_renderSystem.drawText(0, 0, buff, ConsoleColor_Gray, ConsoleColor_Black);
+	m_renderSystem.drawText(0, 0, buff, ConsoleColor::Gray, ConsoleColor::Black);
 
 	// Вывод счётчика кадров
 	sprintf_s(buff, "FPS: %i", m_FPS);
-	m_renderSystem.drawText(0, 16, buff, ConsoleColor_Gray, ConsoleColor_Black);
+	m_renderSystem.drawText(0, 16, buff, ConsoleColor::Gray, ConsoleColor::Black);
 
 	// Конец кадра
 	m_renderSystem.flush();
@@ -145,7 +145,7 @@ void Game::update(float dt)
 			switch (object->getType())
 			{
 				// Корабль героя
-				case GameObjectType_Ship:
+				case GameObjectType::Ship:
 				{
 					// Захождение за границы
 					if (object->getX() < 0)
@@ -169,7 +169,7 @@ void Game::update(float dt)
 							m_shipFireCooldownTime = shipFireCooldown;
 
 							// Инициализация пули
-							GameObject* bullet = createObject(GameObjectType_Bullet, object->getX(), object->getY() - 1,
+							GameObject* bullet = createObject(GameObjectType::Bullet, object->getX(), object->getY() - 1,
 																GetRenderCellSymbol(CellSymbol_Bullet),
 																GetRenderCellSymbolColor(CellSymbol_Bullet),
 																GetRenderCellSymbolBackgroundColor(CellSymbol_Bullet));
@@ -179,7 +179,7 @@ void Game::update(float dt)
 				}
 
 				// Пуля
-				case GameObjectType_Bullet:
+				case GameObjectType::Bullet:
 				{
 					if (object->getY() < 0)
 					{
@@ -193,7 +193,7 @@ void Game::update(float dt)
 
 							if (anotherObject != 0)
 							{
-								if (anotherObject->getType() == GameObjectType_Alien)
+								if (anotherObject->getType() == GameObjectType::Alien)
 								{
 									if (anotherObject->intersects(object))
 									{
@@ -209,7 +209,7 @@ void Game::update(float dt)
 				}
 
 				// Корабль пришельца
-				case GameObjectType_Alien:
+				case GameObjectType::Alien:
 				{
 					haveAliveAliens = true;
 

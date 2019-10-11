@@ -3,12 +3,12 @@
 #include "renderSystem.h"
 
 
-enum GameObjectType
+enum class GameObjectType
 {
-	GameObjectType_None,
-	GameObjectType_Ship,
-	GameObjectType_Bullet,
-	GameObjectType_Alien
+	None,
+	Ship,
+	Bullet,
+	Alien
 };
 
 

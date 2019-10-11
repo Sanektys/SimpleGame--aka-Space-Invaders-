@@ -68,19 +68,19 @@ ConsoleColor GetRenderCellSymbolColor(unsigned char cellSymbol)
 {
 	switch (cellSymbol)
 	{
-		case CellSymbol_Ship:	return ConsoleColor_White;
-		case CellSymbol_Bullet: return ConsoleColor_Red;
-		case CellSymbol_Alien:	return ConsoleColor_Green;
+		case CellSymbol_Ship:	return ConsoleColor::White;
+		case CellSymbol_Bullet: return ConsoleColor::Red;
+		case CellSymbol_Alien:	return ConsoleColor::Green;
 	}
-	return ConsoleColor_Gray;
+	return ConsoleColor::Gray;
 }
 
 ConsoleColor GetRenderCellSymbolBackgroundColor(unsigned char cellSymbol)
 {
 	switch (cellSymbol)
 	{
-		case CellSymbol_Ship:	return ConsoleColor_DarkGray;
+		case CellSymbol_Ship:	return ConsoleColor::DarkGray;
 	}
 
-	return ConsoleColor_Black;
+	return ConsoleColor::Black;
 }

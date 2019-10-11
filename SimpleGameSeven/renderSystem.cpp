@@ -12,8 +12,8 @@ RenderSystem::RenderSystem()
 		for (int c = 0; c < screenColumns; c++)
 		{
 			m_backBuffer[r][c].symbol = 0;
-			m_backBuffer[r][c].symbolColor = ConsoleColor_Gray;
-			m_backBuffer[r][c].backgroundColor = ConsoleColor_Black;
+			m_backBuffer[r][c].symbolColor = ConsoleColor::Gray;
+			m_backBuffer[r][c].backgroundColor = ConsoleColor::Black;
 
 			m_screenBuffer[r][c] = m_backBuffer[r][c];
 		}
@@ -39,7 +39,7 @@ void RenderSystem::clear()
 		for (int c = 0; c < screenColumns; c++)
 		{
 			m_backBuffer[r][c].symbol = 0;
-			m_backBuffer[r][c].backgroundColor = ConsoleColor_Black;
+			m_backBuffer[r][c].backgroundColor = ConsoleColor::Black;
 		}
 	}
 }
@@ -107,6 +107,6 @@ void RenderSystem::setConsoleCursor(int r, int c)
 
 void RenderSystem::setConsoleColor(ConsoleColor symbolColor, ConsoleColor backgroundColor)
 {
-	short consoleColor = symbolColor | (backgroundColor << 4);
+	short consoleColor = (int)symbolColor | ((int)backgroundColor << 4);
 	SetConsoleTextAttribute(m_consoleHandle, consoleColor);
 }
