@@ -42,4 +42,6 @@ class Game
 
 	    float m_shipFireCooldownTime;
 	    float m_alienAmplitudeTime;
+
+		int m_gamePoints;
 };

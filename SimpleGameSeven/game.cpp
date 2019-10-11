@@ -20,6 +20,8 @@ Game::Game()
 
 	m_shipFireCooldownTime = 0.0;
 	m_alienAmplitudeTime = 0.0;
+
+	m_gamePoints = 0;
 }
 
 void Game::setupSystem()
@@ -33,6 +35,7 @@ void Game::initialize()
 {
 	m_shipFireCooldownTime = 0.0;
 	m_alienAmplitudeTime = 0.0;
+	m_gamePoints = 0;
 
 	// Загрузка уровня
 	for (int r = 0; r < LEVEL_ROWS; r++) {
@@ -114,11 +117,15 @@ void Game::render()
 	// Вывод счётчика объектов
 	char buff[64];
 	sprintf_s(buff, "Objects: %d", objectsCount);
-	m_renderSystem.drawText(0, 0, buff, ConsoleColor::GRAY, ConsoleColor::BLACK);
+	m_renderSystem.drawText(0, 0, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
 
 	// Вывод счётчика кадров
 	sprintf_s(buff, "FPS: %i", m_fps);
-	m_renderSystem.drawText(0, 16, buff, ConsoleColor::GRAY, ConsoleColor::BLACK);
+	m_renderSystem.drawText(0, 14, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
+
+	// Вывод счётчика игровых очков
+	sprintf_s(buff, "Points: %i", m_gamePoints);
+	m_renderSystem.drawText(0, 65, buff, ConsoleColor::CYAN, ConsoleColor::BLACK);
 
 	// Конец кадра
 	m_renderSystem.flush();
@@ -182,6 +189,7 @@ void Game::update(float dt)
 									if (anotherObject->intersects(object)) {
 										destroyObject(anotherObject);
 										destroyObject(object);
+										m_gamePoints += 2;
 										break;
 									}
 								}
