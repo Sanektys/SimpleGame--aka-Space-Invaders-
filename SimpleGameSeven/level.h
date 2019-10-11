@@ -5,23 +5,23 @@
 
 //////////////////////////
 // Константы
-const int levelRows = screenRows;
-const int levelColumns = screenColumns;
+const int LEVEL_ROWS = SCREEN_ROWS;
+const int LEVEL_COLUMNS = SCREEN_COLUMNS;
 
-const float shipSpeed = 35.0;
-const float shipFireCooldown = 0.2;
+const float SHIP_SPEED = 35.0;
+const float SHIP_FIRE_COOLDOWN = 0.2;
 
-const float bulletSpeed = 40.0;
+const float BULLET_SPEED = 40.0;
 
-const float alienAmplitude = 6.0;
-const float alienSpeed = 0.23;
+const float ALIEN_AMPLITUDE = 6.0;
+const float ALIEN_SPEED = 0.23;
 
 
-const unsigned char CellSymbol_Ship		= 'S';
-const unsigned char CellSymbol_Bullet	= '|';
-const unsigned char CellSymbol_Alien	= 'X';
+const unsigned char CELL_SYMBOL_SHIP   = 'S';
+const unsigned char CELL_SYMBOL_BULLET = '|';
+const unsigned char CELL_SYMBOL_ALIEN  = 'X';
 
-const unsigned char levelData0[levelRows][levelColumns + 1] =
+const unsigned char FIRST_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 {
 	"                                                                               ",
 	"      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX      ",
@@ -55,32 +55,42 @@ const unsigned char levelData0[levelRows][levelColumns + 1] =
 // Функции
 unsigned char GetRenderCellSymbol(unsigned char cellSymbol)
 {
-	switch (cellSymbol)
-	{
-		case CellSymbol_Ship:	return 202;
-		case CellSymbol_Bullet: return 179;
-		case CellSymbol_Alien:	return 203;
+	switch (cellSymbol) {
+		case CELL_SYMBOL_SHIP :
+			return 202;
+
+		case CELL_SYMBOL_BULLET :
+			return 179;
+
+		case CELL_SYMBOL_ALIEN :
+			return 203;
 	}
+
 	return '?';
 }
 
 ConsoleColor GetRenderCellSymbolColor(unsigned char cellSymbol)
 {
-	switch (cellSymbol)
-	{
-		case CellSymbol_Ship:	return ConsoleColor::White;
-		case CellSymbol_Bullet: return ConsoleColor::Red;
-		case CellSymbol_Alien:	return ConsoleColor::Green;
+	switch (cellSymbol) {
+		case CELL_SYMBOL_SHIP :	
+			return ConsoleColor::WHITE;
+
+		case CELL_SYMBOL_BULLET : 
+			return ConsoleColor::RED;
+
+		case CELL_SYMBOL_ALIEN :	
+			return ConsoleColor::GREEN;
 	}
-	return ConsoleColor::Gray;
+
+	return ConsoleColor::GRAY;
 }
 
 ConsoleColor GetRenderCellSymbolBackgroundColor(unsigned char cellSymbol)
 {
-	switch (cellSymbol)
-	{
-		case CellSymbol_Ship:	return ConsoleColor::DarkGray;
+	switch (cellSymbol) {
+		case CELL_SYMBOL_SHIP :
+			return ConsoleColor::DARK_GRAY;
 	}
 
-	return ConsoleColor::Black;
+	return ConsoleColor::BLACK;
 }
