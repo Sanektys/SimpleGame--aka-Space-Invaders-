@@ -7,12 +7,13 @@ int main()
 {
 	Game* game = new Game();
 
-	game->setupSystem();
-	game->initialize();
+	do {
+		game->setupSystem();
+		game->initialize();
 
-	while (game->frame());
+		while (game->frame());
 
-	game->shutdown();
+	} while (!game->shutdown());
 
 	delete game;
 

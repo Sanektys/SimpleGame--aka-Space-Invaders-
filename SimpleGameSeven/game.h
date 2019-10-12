@@ -18,11 +18,13 @@ class Game
 	    void setupSystem();
 	    void initialize();
 	    bool frame();
-	    void shutdown();
+	    bool shutdown();
 
     private:
         void render();
         void update(float dt);
+		void canIncreaseLevel();
+		void deleteAllObjects();
 
         GameObject* createObject(GameObjectType type, float x, float y,
 			                     char symbol, ConsoleColor color,
@@ -31,10 +33,15 @@ class Game
 
     private:
 	    bool m_isGameActive;
-	    clock_t m_clockLastFrame;
+		bool m_isLosing;
+		bool m_isExitGame;
+		int m_currentLevel;
+	    
+		clock_t m_clockLastFrame;
 	    float m_frameTime;
 	    int m_frameCount;
 	    int m_fps;
+		float m_gameTime;
 
 	    RenderSystem m_renderSystem;
 
@@ -44,4 +51,5 @@ class Game
 	    float m_alienAmplitudeTime;
 
 		int m_gamePoints;
+		int m_lastLevelPoints;
 };

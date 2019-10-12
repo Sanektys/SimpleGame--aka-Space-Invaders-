@@ -10,10 +10,15 @@
 Game::Game()
 {
 	m_isGameActive = true;
+	m_isLosing = false;
+	m_isExitGame = false;
 	m_clockLastFrame = 0;
 	m_frameTime = 0.0;
 	m_frameCount = 0;
 	m_fps = 0;
+	m_gameTime = 0.0;
+
+	m_currentLevel = 1;
 
 	for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++)
 		m_objects[i] = 0;
@@ -22,6 +27,7 @@ Game::Game()
 	m_alienAmplitudeTime = 0.0;
 
 	m_gamePoints = 0;
+	m_lastLevelPoints = 0;
 }
 
 void Game::setupSystem()
@@ -35,17 +41,36 @@ void Game::initialize()
 {
 	m_shipFireCooldownTime = 0.0;
 	m_alienAmplitudeTime = 0.0;
-	m_gamePoints = 0;
+	if (m_currentLevel == 1) {
+		m_gamePoints = 0;
+		m_gameTime = 0.0;
+	}
 
 	// Загрузка уровня
 	for (int r = 0; r < LEVEL_ROWS; r++) {
 		for (int c = 0; c < LEVEL_COLUMNS; c++) {
-			unsigned char cellSymbol = FIRST_LEVEL_DATA[r][c];
+			unsigned char cellSymbol = ' ';
+			switch (m_currentLevel) {
+				case 1 :
+					cellSymbol = FIRST_LEVEL_DATA[r][c];
+					break;
+
+				case 2 :
+					cellSymbol = SECOND_LEVEL_DATA[r][c];
+					break;
+
+				case 3 :
+					cellSymbol = THIRD_LEVEL_DATA[r][c];
+					break;
+
+				case 4 :
+					cellSymbol = FOURTH_LEVEL_DATA[r][c];
+					break;
+			}
 
 			switch (cellSymbol) {
 				// Инициализация корабля
-				case CELL_SYMBOL_SHIP :
-				{
+				case CELL_SYMBOL_SHIP : {
 					createObject(GameObjectType::SHIP, (c + 0.5), r,
                                  GetRenderCellSymbol(cellSymbol),
                                  GetRenderCellSymbolColor(cellSymbol),
@@ -54,8 +79,7 @@ void Game::initialize()
 				}
 
 				// Инициализация корабля пришельца
-				case CELL_SYMBOL_ALIEN :
-				{
+				case CELL_SYMBOL_ALIEN : {
 					GameObject* alien = createObject(GameObjectType::ALIEN, (c + 0.5), r,
                                                      GetRenderCellSymbol(cellSymbol),
                                                      GetRenderCellSymbolColor(cellSymbol),
@@ -69,6 +93,30 @@ void Game::initialize()
 	}
 }
 
+void Game::canIncreaseLevel()
+{
+	if (m_isExitGame) {
+		m_isGameActive = false;
+		return;
+	}
+
+	if (!m_isGameActive && !m_isLosing) {
+		if (m_currentLevel < 4) {
+			m_currentLevel++;
+			m_isGameActive = true;
+			m_lastLevelPoints = m_gamePoints;
+			deleteAllObjects();
+			initialize();
+		}
+		else {
+			m_isGameActive = false;
+		}
+	}
+	else if (m_isLosing) {
+		m_isGameActive = false;
+	}
+}
+
 bool Game::frame()
 {
 	// Расчёт дельты фремени
@@ -76,6 +124,7 @@ bool Game::frame()
 	clock_t deltaClock = clockNow - m_clockLastFrame;
 	float deltaTime = float(deltaClock) / CLOCKS_PER_SEC;
 	m_clockLastFrame = clockNow;
+	m_gameTime += deltaTime;
 
 	// Расчёт FPS
 	m_frameTime += deltaTime;
@@ -88,17 +137,9 @@ bool Game::frame()
 
 	render();
 	update(deltaTime);
+	canIncreaseLevel();
 
 	return m_isGameActive;
-}
-
-void Game::shutdown()
-{
-	for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++)
-		if (m_objects[i] != 0) {
-		    delete m_objects[i];
-			m_objects[i] = 0;
-		}
 }
 
 void Game::render()
@@ -203,8 +244,8 @@ void Game::update(float dt)
 				case GameObjectType::ALIEN : {
 					haveAliveAliens = true;
 
-					if (object->getY() >= SCREEN_ROWS)
-						m_isGameActive = false;
+					if (object->getY() >= SCREEN_ROWS - 1)
+						m_isLosing = true;
 					else
 						object->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
 					break;
@@ -219,6 +260,9 @@ void Game::update(float dt)
 
 	// Время колебательного движения пришельцев
 	m_alienAmplitudeTime += dt;
+
+	if (IsKeyDown(VK_ESCAPE))
+		m_isExitGame = true;
 
 	// Победа
 	if (!haveAliveAliens)
@@ -257,4 +301,96 @@ void Game::destroyObject(GameObject* object)
 			return;
 		}
 	}
+}
+
+void Game::deleteAllObjects()
+{
+	for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++)
+		if (m_objects[i] != 0) {
+			delete m_objects[i];
+			m_objects[i] = 0;
+		}
+}
+
+bool Game::shutdown()
+{
+	deleteAllObjects();
+	m_renderSystem.clear();
+	m_renderSystem.flush();
+
+	if (m_isExitGame)
+		return true;
+
+	// Расчёт потраченного времени
+	int spendedMinutes = m_gameTime / 60;
+	int spendedSeconds = m_gameTime - (spendedMinutes * 60);
+
+	char buff[64];
+
+	if (!m_isGameActive && !m_isLosing) {
+		Sleep(400);
+		sprintf_s(buff, "You are...");
+		m_renderSystem.drawText(4, 34, buff, ConsoleColor::YELLOW, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		Sleep(1200);
+		sprintf_s(buff, "W I N N E R !!!");
+		m_renderSystem.drawText(7, 32, buff, ConsoleColor::GREEN, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		Sleep(600);
+		sprintf_s(buff, "Spended time: %i min %i sec", spendedMinutes, spendedSeconds);
+		m_renderSystem.drawText(11, 26, buff, ConsoleColor::WHITE, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		Sleep(600);
+		sprintf_s(buff, "Earned points: %i", m_gamePoints);
+		m_renderSystem.drawText(13, 30, buff, ConsoleColor::CYAN, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		Sleep(800);
+		sprintf_s(buff, "Press ENTER or ESCAPE for exit...");
+		m_renderSystem.drawText(16, 24, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		while (!IsKeyDown(VK_RETURN) && !IsKeyDown(VK_ESCAPE))
+			;
+
+		return true;
+	}
+	else if (m_isLosing) {
+		Sleep(600);
+		sprintf_s(buff, "You were defeated");
+		m_renderSystem.drawText(4, 31, buff, ConsoleColor::RED, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		Sleep(600);
+		sprintf_s(buff, "Spended time: %i min %i sec", spendedMinutes, spendedSeconds);
+		m_renderSystem.drawText(7, 27, buff, ConsoleColor::WHITE, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		Sleep(600);
+		sprintf_s(buff, "Earned points: %i", m_gamePoints);
+		m_renderSystem.drawText(9, 31, buff, ConsoleColor::CYAN, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		Sleep(800);
+		sprintf_s(buff, "Press R to repeat or ESCAPE for exit...");
+		m_renderSystem.drawText(12, 21, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
+		m_renderSystem.flush();
+
+		do {
+			if (IsKeyDown(0x52)) {
+				m_clockLastFrame = clock();
+				m_isLosing = false;
+				m_isGameActive = true;
+				m_gamePoints = m_lastLevelPoints;
+				return false;
+			}
+			else if (IsKeyDown(VK_ESCAPE))
+				return true;
+		} while (true);
+	}
+
+	return true;
 }
