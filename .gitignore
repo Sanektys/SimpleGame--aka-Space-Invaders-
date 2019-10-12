@@ -3,7 +3,6 @@ Release/
 !Release/*.exe
 SimpleGameSeven/Debug/
 SimpleGameSeven/Release/
-SimpleGameSeven/*.filters
 SimpleGameSeven/*.user
 *.ipch
 .vs/SimpleGameSeven/v16/.suo
