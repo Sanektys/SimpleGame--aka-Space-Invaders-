@@ -18,7 +18,7 @@ Game::Game()
 	m_fps = 0;
 	m_gameTime = 0.0;
 
-	m_currentLevel = 2;
+	m_currentLevel = 1;
 
 	for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++)
 		m_objects[i] = 0;
@@ -90,13 +90,37 @@ void Game::initialize()
 				}
 
                 // Инициализация корабля-носителя пришельцев
-				case CELL_SYMBOL_MOTHERSHIP_ALIEN: {
+				case CELL_SYMBOL_MOTHERSHIP_ALIEN : {
 					GameObject* mothership = createObject(GameObjectType::MOTHERSHIP_ALIEN, (c + 0.5), r,
 						                                  GetRenderCellSymbol(cellSymbol),
 						                                  GetRenderCellSymbolColor(cellSymbol),
 						                                  GetRenderCellSymbolBackgroundColor(cellSymbol));
 					mothership->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
 					mothership->setYSpeed(ALIEN_SPEED);
+					break;
+				}
+
+				// Инициализация "тяжёлого" корабля пришельцев
+				case CELL_SYMBOL_HEAVY_ALIEN : {
+					GameObject* armoredAlien = createObject(GameObjectType::HEAVY_ALIEN, (c + 0.5), r,
+						                                    GetRenderCellSymbol(cellSymbol),
+						                                    GetRenderCellSymbolColor(cellSymbol),
+						                                    GetRenderCellSymbolBackgroundColor(cellSymbol));
+					armoredAlien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+					armoredAlien->setYSpeed(ALIEN_SPEED);
+					armoredAlien->setHealth(HEAVY_ALIEN_HEALTH);
+					break;
+				}
+
+				// Инициализация "бронированного" корабля пришельцев
+				case CELL_SYMBOL_ARMORED_ALIEN : {
+					GameObject* armoredAlien = createObject(GameObjectType::ARMORED_ALIEN, (c + 0.5), r,
+						                                    GetRenderCellSymbol(cellSymbol),
+						                                    GetRenderCellSymbolColor(cellSymbol),
+						                                    GetRenderCellSymbolBackgroundColor(cellSymbol));
+					armoredAlien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+					armoredAlien->setYSpeed(ALIEN_SPEED);
+					armoredAlien->setHealth(ARMORED_ALIEN_HEALTH);
 					break;
 				}
 			}
@@ -218,7 +242,7 @@ void Game::update(float dt)
 
 							// Инициализация пули
 							GameObject* bullet = createObject(GameObjectType::BULLET,
-								                              object->getX(), object->getY() - 1,
+								                              object->getX(), object->getY() - 0.5,
                                                               GetRenderCellSymbol(CELL_SYMBOL_BULLET),
 				                                              GetRenderCellSymbolColor(CELL_SYMBOL_BULLET),
 						                                      GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_BULLET));
@@ -230,24 +254,27 @@ void Game::update(float dt)
 				// Пуля
 				case GameObjectType::BULLET : {
 					if (object->getY() < 0) {
-						destroyObject(object);
+						hitObject(object);
 					}
 					else {
 						for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++) {
 							GameObject* anotherObject = m_objects[i];
-
+							// Определение типа противника, с которым пересеклась пуля,
+							// и его уничтожение/повреждение
 							if (anotherObject != 0) {
+								// Уничтожение обычного пришельца
 								if (anotherObject->getType() == GameObjectType::ALIEN) {
 									if (anotherObject->intersects(object)) {
-										destroyObject(anotherObject);
-										destroyObject(object);
+										hitObject(anotherObject);
+										hitObject(object);
 										m_gamePoints += 2;
 										break;
 									}
 								}
+								// Уничтожение корабля-носителя пришельцев
 								if (anotherObject->getType() == GameObjectType::MOTHERSHIP_ALIEN) {
 									if (anotherObject->intersects(object)) {
-										GameObject* alien = createObject(GameObjectType::ALIEN,
+										GameObject* alien = createObject(GameObjectType::HEAVY_ALIEN,
 											                             anotherObject->getX() + 1,
 											                             anotherObject->getY(),
 											                             GetRenderCellSymbol(CELL_SYMBOL_ALIEN),
@@ -255,7 +282,8 @@ void Game::update(float dt)
 											                             GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_ALIEN));
 										alien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
 										alien->setYSpeed(ALIEN_SPEED);
-										alien = createObject(GameObjectType::ALIEN,
+										alien->setHealth(HEAVY_ALIEN_HEALTH);
+										alien = createObject(GameObjectType::HEAVY_ALIEN,
 											                 anotherObject->getX() - 1,
 											                 anotherObject->getY(),
 											                 GetRenderCellSymbol(CELL_SYMBOL_ALIEN),
@@ -263,7 +291,8 @@ void Game::update(float dt)
 											                 GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_ALIEN));
 										alien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
 										alien->setYSpeed(ALIEN_SPEED);
-										alien = createObject(GameObjectType::ALIEN,
+										alien->setHealth(HEAVY_ALIEN_HEALTH);
+										alien = createObject(GameObjectType::HEAVY_ALIEN,
 											                 anotherObject->getX(),
 											                 anotherObject->getY() + 1,
 											                 GetRenderCellSymbol(CELL_SYMBOL_ALIEN),
@@ -271,9 +300,28 @@ void Game::update(float dt)
 											                 GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_ALIEN));
 										alien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
 										alien->setYSpeed(ALIEN_SPEED);
-										destroyObject(anotherObject);
-										destroyObject(object);
+										alien->setHealth(HEAVY_ALIEN_HEALTH);
+										hitObject(anotherObject);
+										hitObject(object);
 										m_gamePoints += 5;
+										break;
+									}
+								}
+								// Уничтожение/повреждение "тяжёлого" корабля пришельцев
+								if (anotherObject->getType() == GameObjectType::HEAVY_ALIEN) {
+									if (anotherObject->intersects(object)) {
+										hitObject(anotherObject);
+										hitObject(object);
+										m_gamePoints += 4;
+										break;
+									}
+								}
+								// Уничтожение/повреждение "бронированного" корабля пришельцев
+								if (anotherObject->getType() == GameObjectType::ARMORED_ALIEN) {
+									if (anotherObject->intersects(object)) {
+										hitObject(anotherObject);
+										hitObject(object);
+										m_gamePoints += 12;
 										break;
 									}
 								}
@@ -283,19 +331,8 @@ void Game::update(float dt)
 					break;
 				}
 
-				// Стандартный корабль пришельца
-				case GameObjectType::ALIEN : {
-					haveAliveAliens = true;
-
-					if (object->getY() >= SCREEN_ROWS - 1)
-						m_isLosing = true;
-					else
-						object->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
-					break;
-				}
-
-                // Корабль-носитель пришельцев
-				case GameObjectType::MOTHERSHIP_ALIEN: {
+                // Действия для всех кораблей пришельцев
+				default: {
 					haveAliveAliens = true;
 
 					if (object->getY() >= SCREEN_ROWS - 1)
@@ -344,6 +381,16 @@ GameObject* Game::createObject(GameObjectType type, float x, float y, char symbo
 	}
 
 	return 0;
+}
+
+void Game::hitObject(GameObject* object)
+{
+	int health = object->getHealth();
+	object->setHealth(--health);
+	
+	health = object->getHealth();
+	if (health <= 0)
+		destroyObject(object);
 }
 
 void Game::destroyObject(GameObject* object)
@@ -425,7 +472,7 @@ bool Game::shutdown()
 
 		Sleep(600);
 		sprintf_s(buff, "Earned points: %i", m_gamePoints);
-		m_renderSystem.drawText(9, 31, buff, ConsoleColor::CYAN, ConsoleColor::BLACK);
+		m_renderSystem.drawText(9, 30, buff, ConsoleColor::CYAN, ConsoleColor::BLACK);
 		m_renderSystem.flush();
 
 		Sleep(800);

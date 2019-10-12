@@ -9,7 +9,9 @@ enum class GameObjectType
 	SHIP,
 	BULLET,
 	ALIEN,
-	MOTHERSHIP_ALIEN
+	MOTHERSHIP_ALIEN,
+	HEAVY_ALIEN,
+	ARMORED_ALIEN
 };
 
 
@@ -23,9 +25,12 @@ class GameObject
 
 	    bool intersects(GameObject* object);
 
-
+		// Методы оперирования над членами класса
 	    void setType(GameObjectType type) { m_type = type; }
 	    GameObjectType getType() { return m_type; }
+
+		void setHealth(int health) { m_health = health; }
+		int getHealth() { return m_health; }
 
 	    void setX(float x) { m_x = x; }
 	    float getX() { return m_x; }
@@ -50,6 +55,8 @@ class GameObject
 
     private:
 	    GameObjectType m_type;
+
+		int m_health;
 
 	    float m_x;
 	    float m_y;

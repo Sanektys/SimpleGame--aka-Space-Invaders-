@@ -30,6 +30,7 @@ class Game
 			                     char symbol, ConsoleColor color,
 			                     ConsoleColor bgColor);
         void destroyObject(GameObject* object);
+		void hitObject(GameObject* object);
 
     private:
 	    bool m_isGameActive;

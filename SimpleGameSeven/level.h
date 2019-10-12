@@ -17,11 +17,15 @@ const float BULLET_SPEED = 40.0;
 const float ALIEN_AMPLITUDE = 6.0;
 const float ALIEN_SPEED = 0.23;
 
+const int ARMORED_ALIEN_HEALTH = 9;
+const int HEAVY_ALIEN_HEALTH = 3;
 
 const unsigned char CELL_SYMBOL_SHIP   = 'S';
 const unsigned char CELL_SYMBOL_BULLET = '|';
 const unsigned char CELL_SYMBOL_ALIEN  = 'X';
-const unsigned char CELL_SYMBOL_MOTHERSHIP_ALIEN = 'A';
+const unsigned char CELL_SYMBOL_MOTHERSHIP_ALIEN = 'M';
+const unsigned char CELL_SYMBOL_HEAVY_ALIEN = 'H';
+const unsigned char CELL_SYMBOL_ARMORED_ALIEN = 'T';
 
 const unsigned char FIRST_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 {
@@ -58,18 +62,18 @@ const unsigned char SECOND_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 	"     XX  XXXXXX  XX          XXXX XX       XX XXXX          XX  XXXXXX  XX     ",
 	"       XXX    XXX              XXX  XX   XX  XXX              XXX    XXX       ",
 	"        XX    XX                 X    X X    X                 XX    XX        ",
-	"         AX  XA                  XX    X    XX                  AX  XA         ",
+	"         MX  XM                  XX    X    XX                  MX  XM         ",
 	"          X  X                    X    X    X                    X  X          ",
-	"          X  X                    X   XAX   X                    X  X          ",
-	"         X    X                 XX  XXAAAXX  XX                 X    X         ",
+	"          X  X                    X   XMX   X                    X  X          ",
+	"         X    X                 XX  XXMMMXX  XX                 X    X         ",
 	"         X    X                 X XX  XXX  XX X                 X    X         ",
-	"        A      A               XXX   X X X   XXX               A      A        ",
-	"                              XX    X  A  X    XX                              ",
-	"                            XXXAA XX  AAA  XX AAXXX                            ",
-	"                         XXXAAAXXX  XX   XX  XXXAAAXXX                         ",
-	"                        XAAXXXX       XXX       XXXXAAX                        ",
+	"        M      M               XXX   X X X   XXX               M      M        ",
+	"                              XX    X  M  X    XX                              ",
+	"                            XXXM  XX  MMM  XX  MXXX                            ",
+	"                         XXXMM XXX  XX   XX  XXX MMXXX                         ",
+	"                        XM XXXX       XXX       XXXX MX                        ",
 	"                       XXXX                         XXXX                       ",
-	"                      A                                 A                      ",
+	"                      M                                 M                      ",
 	"                                                                               ",
 	"                                                                               ",
 	"                                                                               ",
@@ -84,16 +88,16 @@ const unsigned char SECOND_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 const unsigned char THIRD_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 {
 	"                                                                               ",
-	"                              XXXXXXXXXXXXXXXXXXX                              ",
-	"                    XXXXXXXXXXXXX             XXXXXXXXXXXXX                    ",
-	"            XXXXXXXXXX                XXX                XXXXXXXXXX            ",
-	"      XXXXXXXX           XXX        XX   XX        XXX           XXXXXXXX      ",
-	"                        XX XX      X       X      XX XX                        ",
-	"          XXXXXXXX     X     X                   X     X     XXXXXXXX          ",
-	"               XXXXXXXXX             X   X             XXXXXXXXX               ",
-	"                      XXXXXXXXX       X X       XXXXXXXXX                      ",
-	"                              XXXXXXX     XXXXXXX                              ",
-	"                                   XXX   XXX                                   ",
+	"                              XXXXXXHHXHXHHXXXXXX                              ",
+	"                    XXXXXXXXXXHHH             HHHXXXXXXXXXX                    ",
+	"            XXXXXXXXHH                HHH                HHXXXXXXXX            ",
+	"      XXXXXXHH           HHH        HHTTTHH        HHH           HHXXXXXX      ",
+	"                        HHTHH      HTT   TTH      HHTHH                        ",
+	"          XXXXXHHH     HTT TTH     T T   T T     HTT TTH     HHHXXXXX          ",
+	"               XXXXXXXHT     T       XT TX       T     THXXXXXXX               ",
+	"                      XXXXXXXXH       X X       HXXXXXXXX                      ",
+	"                              XXXXHHH     HHHXXXX                              ",
+	"                                   XHH   HHX                                   ",
 	"                                     X   X                                     ",
 	"                                                                               ",
 	"                                                                               ",
@@ -113,22 +117,23 @@ const unsigned char THIRD_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 const unsigned char FOURTH_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 {
 	"                                                                               ",
-	"                                    XX   XX                                    ",
-	"                                    X XXX X                                    ",
-	"                          XXXXXXX  X   X   X  XXXXXXX                          ",
-	"                       XXXX     XXX    X    XXX     XXXX                       ",
-	"                    XXX            X  X X  X            XXX                    ",
-	"                  XX                XX   XX                XX                  ",
-	"                 X        XXXXXXX     XXX     XXXXXXX        X                 ",
-	"                X      XXXX     XXX         XXX     XXXX      X                ",
-	"               X      XXX         XXX     XXX         XXX      X               ",
-	"               X     XX            X X   X X            XX     X               ",
-	"              X     XX              X X X X              XX     X              ",
-	"             X     X                X     X                X     X             ",
-	"             X    X                  X   X                  X    X             ",
-	"            X   XX                    X X                    XX   X            ",
-	"            XXXX                       X                       XXXX            ",
-	"           XX                                                     XX           ",
+	"                                    HT   TH                                    ",
+	"                                    H THT H                                    ",
+	"                          HHHHHHH  H   T   H  HHHHHHH                          ",
+	"                       HHHH     HHH    H    HHH     HHHH                       ",
+	"                    HHH            H  T T  H            HHH                    ",
+	"                  HH                HT   TH                HH                  ",
+	"                 H        HHHHHHH     TTT     HHHHHHH        H                 ",
+	"                H      HHHH     HHH         HHH     HHHH      H                ",
+	"               H      HHH         HMM     MMH         HHH      H               ",
+	"               H     HH            H M   M H            HH     H               ",
+	"              H     HH              H  T  H              HH     H              ",
+	"             H     H                H T T H                H     H             ",
+	"             H    H                  H   H                  H    H             ",
+	"            H   HH                    H H                    HH   H            ",
+	"            HMMH                       H                       HMMH            ",
+	"           MM                                                     MM           ",
+	"                                                                               ",
 	"                                                                               ",
 	"                                                                               ",
 	"                                                                               ",
@@ -154,6 +159,12 @@ unsigned char GetRenderCellSymbol(unsigned char cellSymbol)
 			return 203;
 
 		case CELL_SYMBOL_MOTHERSHIP_ALIEN :
+			return 197;
+
+		case CELL_SYMBOL_HEAVY_ALIEN :
+			return 203;
+
+		case CELL_SYMBOL_ARMORED_ALIEN :
 			return 206;
 	}
 
@@ -174,6 +185,12 @@ ConsoleColor GetRenderCellSymbolColor(unsigned char cellSymbol)
 
 		case CELL_SYMBOL_MOTHERSHIP_ALIEN :
 			return ConsoleColor::DARK_GREEN;
+
+		case CELL_SYMBOL_HEAVY_ALIEN :
+			return ConsoleColor::GREEN;
+
+		case CELL_SYMBOL_ARMORED_ALIEN :
+			return ConsoleColor::GREEN;
 	}
 
 	return ConsoleColor::GRAY;
@@ -184,6 +201,9 @@ ConsoleColor GetRenderCellSymbolBackgroundColor(unsigned char cellSymbol)
 	switch (cellSymbol) {
 		case CELL_SYMBOL_SHIP :
 			return ConsoleColor::DARK_GRAY;
+
+		case CELL_SYMBOL_ARMORED_ALIEN :
+			return ConsoleColor::DARK_BLUE;
 	}
 
 	return ConsoleColor::BLACK;
