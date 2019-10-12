@@ -1,21 +1,21 @@
 #pragma once
 
-enum ConsoleColor
+enum class ConsoleColor
 {
-	ConsoleColor_Black			= 0,
-	ConsoleColor_DarkBlue		= 1,
-	ConsoleColor_DarkGreen		= 2,
-	ConsoleColor_DarkCyan		= 3,
-	ConsoleColor_DarkRed		= 4,
-	ConsoleColor_DarkMagenta	= 5,
-	ConsoleColor_DarkYellow		= 6,
-	ConsoleColor_Gray			= 7,
-	ConsoleColor_DarkGray		= 8,
-	ConsoleColor_Blue			= 9,
-	ConsoleColor_Green			= 10,
-	ConsoleColor_Cyan			= 11,
-	ConsoleColor_Red			= 12,
-	ConsoleColor_Magenta		= 13,
-	ConsoleColor_Yellow			= 14,
-	ConsoleColor_White			= 15,
+    BLACK        = 0,
+    DARK_BLUE    = 1,
+    DARK_GREEN   = 2,
+    DARK_CYAN    = 3,
+    DARK_RED     = 4,
+    DARK_MAGENTA = 5,
+    DARK_YELLOW  = 6,
+    GRAY         = 7,
+    DARK_GRAY    = 8,
+    BLUE         = 9,
+    GREEN        = 10,
+    CYAN         = 11,
+    RED          = 12,
+    MAGENTA      = 13,
+    YELLOW       = 14,
+    WHITE        = 15,
 };

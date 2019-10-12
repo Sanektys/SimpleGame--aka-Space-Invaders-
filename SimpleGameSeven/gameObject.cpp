@@ -3,7 +3,7 @@
 
 GameObject::GameObject()
 {
-	m_type = GameObjectType_None;
+	m_type = GameObjectType::NONE;
 
 	m_x = 0.0;
 	m_y = 0.0;
@@ -11,8 +11,8 @@ GameObject::GameObject()
 	m_ySpeed = 0.0;
 
 	m_symbol = '?';
-	m_color = ConsoleColor_White;
-	m_backgroundColor = ConsoleColor_Black;
+	m_color = ConsoleColor::WHITE;
+	m_backgroundColor = ConsoleColor::BLACK;
 }
 
 void GameObject::render(RenderSystem* rs)
@@ -31,7 +31,8 @@ void GameObject::update(float dt)
 
 bool GameObject::intersects(GameObject* object)
 {
-	if (int(m_y) == int(object->m_y) && int(m_x) == int(object->m_x)) return true;
+	if (int(m_y) == int(object->m_y) && int(m_x) == int(object->m_x))
+		return true;
 
 	return false;
 }
