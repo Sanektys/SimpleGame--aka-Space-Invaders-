@@ -5,10 +5,11 @@
 
 enum class GameObjectType
 {
-    NONE,
-    SHIP,
-    BULLET,
-    ALIEN
+	NONE,
+	SHIP,
+	BULLET,
+	ALIEN,
+	MOTHERSHIP_ALIEN
 };
 
 

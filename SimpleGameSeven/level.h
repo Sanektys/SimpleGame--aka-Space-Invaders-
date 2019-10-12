@@ -21,6 +21,7 @@ const float ALIEN_SPEED = 0.23;
 const unsigned char CELL_SYMBOL_SHIP   = 'S';
 const unsigned char CELL_SYMBOL_BULLET = '|';
 const unsigned char CELL_SYMBOL_ALIEN  = 'X';
+const unsigned char CELL_SYMBOL_MOTHERSHIP_ALIEN = 'A';
 
 const unsigned char FIRST_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 {
@@ -57,18 +58,18 @@ const unsigned char SECOND_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 	"     XX  XXXXXX  XX          XXXX XX       XX XXXX          XX  XXXXXX  XX     ",
 	"       XXX    XXX              XXX  XX   XX  XXX              XXX    XXX       ",
 	"        XX    XX                 X    X X    X                 XX    XX        ",
-	"         XX  XX                  XX    X    XX                  XX  XX         ",
+	"         AX  XA                  XX    X    XX                  AX  XA         ",
 	"          X  X                    X    X    X                    X  X          ",
-	"          X  X                    X   X X   X                    X  X          ",
-	"         X    X                 XX  XX   XX  XX                 X    X         ",
+	"          X  X                    X   XAX   X                    X  X          ",
+	"         X    X                 XX  XXAAAXX  XX                 X    X         ",
 	"         X    X                 X XX  XXX  XX X                 X    X         ",
-	"        X      X               XXX   X X X   XXX               X      X        ",
-	"                              XX    X     X    XX                              ",
-	"                            XXX   XX       XX   XXX                            ",
-	"                         XXX   XXX  XX   XX  XXX   XXX                         ",
-	"                        X  XXXX       XXX       XXXX  X                        ",
+	"        A      A               XXX   X X X   XXX               A      A        ",
+	"                              XX    X  A  X    XX                              ",
+	"                            XXXAA XX  AAA  XX AAXXX                            ",
+	"                         XXXAAAXXX  XX   XX  XXXAAAXXX                         ",
+	"                        XAAXXXX       XXX       XXXXAAX                        ",
 	"                       XXXX                         XXXX                       ",
-	"                      X                                 X                      ",
+	"                      A                                 A                      ",
 	"                                                                               ",
 	"                                                                               ",
 	"                                                                               ",
@@ -151,6 +152,9 @@ unsigned char GetRenderCellSymbol(unsigned char cellSymbol)
 
 		case CELL_SYMBOL_ALIEN :
 			return 203;
+
+		case CELL_SYMBOL_MOTHERSHIP_ALIEN :
+			return 206;
 	}
 
 	return '?';
@@ -167,6 +171,9 @@ ConsoleColor GetRenderCellSymbolColor(unsigned char cellSymbol)
 
 		case CELL_SYMBOL_ALIEN :	
 			return ConsoleColor::GREEN;
+
+		case CELL_SYMBOL_MOTHERSHIP_ALIEN :
+			return ConsoleColor::DARK_GREEN;
 	}
 
 	return ConsoleColor::GRAY;

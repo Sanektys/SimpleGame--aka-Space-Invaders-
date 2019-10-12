@@ -18,7 +18,7 @@ Game::Game()
 	m_fps = 0;
 	m_gameTime = 0.0;
 
-	m_currentLevel = 1;
+	m_currentLevel = 2;
 
 	for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++)
 		m_objects[i] = 0;
@@ -86,6 +86,17 @@ void Game::initialize()
                                                      GetRenderCellSymbolBackgroundColor(cellSymbol));
 					alien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
 					alien->setYSpeed(ALIEN_SPEED);
+					break;
+				}
+
+                // Инициализация корабля-носителя пришельцев
+				case CELL_SYMBOL_MOTHERSHIP_ALIEN: {
+					GameObject* mothership = createObject(GameObjectType::MOTHERSHIP_ALIEN, (c + 0.5), r,
+						                                  GetRenderCellSymbol(cellSymbol),
+						                                  GetRenderCellSymbolColor(cellSymbol),
+						                                  GetRenderCellSymbolBackgroundColor(cellSymbol));
+					mothership->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+					mothership->setYSpeed(ALIEN_SPEED);
 					break;
 				}
 			}
@@ -234,14 +245,57 @@ void Game::update(float dt)
 										break;
 									}
 								}
+								if (anotherObject->getType() == GameObjectType::MOTHERSHIP_ALIEN) {
+									if (anotherObject->intersects(object)) {
+										GameObject* alien = createObject(GameObjectType::ALIEN,
+											                             anotherObject->getX() + 1,
+											                             anotherObject->getY(),
+											                             GetRenderCellSymbol(CELL_SYMBOL_ALIEN),
+											                             GetRenderCellSymbolColor(CELL_SYMBOL_ALIEN),
+											                             GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_ALIEN));
+										alien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+										alien->setYSpeed(ALIEN_SPEED);
+										alien = createObject(GameObjectType::ALIEN,
+											                 anotherObject->getX() - 1,
+											                 anotherObject->getY(),
+											                 GetRenderCellSymbol(CELL_SYMBOL_ALIEN),
+											                 GetRenderCellSymbolColor(CELL_SYMBOL_ALIEN),
+											                 GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_ALIEN));
+										alien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+										alien->setYSpeed(ALIEN_SPEED);
+										alien = createObject(GameObjectType::ALIEN,
+											                 anotherObject->getX(),
+											                 anotherObject->getY() + 1,
+											                 GetRenderCellSymbol(CELL_SYMBOL_ALIEN),
+											                 GetRenderCellSymbolColor(CELL_SYMBOL_ALIEN),
+											                 GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_ALIEN));
+										alien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+										alien->setYSpeed(ALIEN_SPEED);
+										destroyObject(anotherObject);
+										destroyObject(object);
+										m_gamePoints += 5;
+										break;
+									}
+								}
 							}
 						}
 					}
 					break;
 				}
 
-				// Корабль пришельца
+				// Стандартный корабль пришельца
 				case GameObjectType::ALIEN : {
+					haveAliveAliens = true;
+
+					if (object->getY() >= SCREEN_ROWS - 1)
+						m_isLosing = true;
+					else
+						object->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+					break;
+				}
+
+                // Корабль-носитель пришельцев
+				case GameObjectType::MOTHERSHIP_ALIEN: {
 					haveAliveAliens = true;
 
 					if (object->getY() >= SCREEN_ROWS - 1)
@@ -375,8 +429,8 @@ bool Game::shutdown()
 		m_renderSystem.flush();
 
 		Sleep(800);
-		sprintf_s(buff, "Press R to repeat or ESCAPE for exit...");
-		m_renderSystem.drawText(12, 21, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
+		sprintf_s(buff, "Press R to repeat level %i or ESCAPE for exit...", m_currentLevel);
+		m_renderSystem.drawText(12, 17, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
 		m_renderSystem.flush();
 
 		do {
