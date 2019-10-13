@@ -31,6 +31,7 @@ class Game
 			                     ConsoleColor bgColor);
         void destroyObject(GameObject* object);
 		void hitObject(GameObject* object);
+		void spawnBonus(bool order, GameObject* object);
 
     private:
 	    bool m_isGameActive;
@@ -50,6 +51,9 @@ class Game
 
 	    float m_shipFireCooldownTime;
 	    float m_alienAmplitudeTime;
+		float m_bonusFreezingTime;
+		float m_bonusFastRechargeTime;
+		float m_bonusTripleFireTime;
 
 		int m_gamePoints;
 		int m_lastLevelPoints;

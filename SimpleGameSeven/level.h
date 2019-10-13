@@ -5,27 +5,37 @@
 
 //////////////////////////
 // Константы
-const int LEVEL_ROWS = SCREEN_ROWS;
+const int LEVEL_ROWS    = SCREEN_ROWS;
 const int LEVEL_COLUMNS = SCREEN_COLUMNS;
 const int LEVELS_NUMBER = 4;
 
-const float SHIP_SPEED = 35.0;
+const float SHIP_SPEED         = 28.6;
 const float SHIP_FIRE_COOLDOWN = 0.2;
 
 const float BULLET_SPEED = 40.0;
 
+const float BONUS_SPEED  = 1.6;
+const float BONUS_FREEZING_TIME = 8.0;
+const float BONUS_FAST_RECHARGE_TIME = 6.0;
+const float BONUS_TRIPLE_FIRE_TIME = 5.0;
+
 const float ALIEN_AMPLITUDE = 6.0;
-const float ALIEN_SPEED = 0.23;
+const float ALIEN_SPEED     = 0.24;
 
 const int ARMORED_ALIEN_HEALTH = 9;
-const int HEAVY_ALIEN_HEALTH = 3;
+const int HEAVY_ALIEN_HEALTH   = 3;
 
-const unsigned char CELL_SYMBOL_SHIP   = 'S';
-const unsigned char CELL_SYMBOL_BULLET = '|';
-const unsigned char CELL_SYMBOL_ALIEN  = 'X';
+const unsigned char CELL_SYMBOL_SHIP             = 'S';
+const unsigned char CELL_SYMBOL_BULLET           = '|';
+const unsigned char CELL_SYMBOL_ALIEN_BULLET     = '/';
+const unsigned char CELL_SYMBOL_ALIEN            = 'X';
 const unsigned char CELL_SYMBOL_MOTHERSHIP_ALIEN = 'M';
-const unsigned char CELL_SYMBOL_HEAVY_ALIEN = 'H';
-const unsigned char CELL_SYMBOL_ARMORED_ALIEN = 'T';
+const unsigned char CELL_SYMBOL_HEAVY_ALIEN      = 'H';
+const unsigned char CELL_SYMBOL_ARMORED_ALIEN    = 'T';
+const unsigned char CELL_SYMBOL_SHOOTING_ALIEN   = 'G';
+const unsigned char CELL_SYMBOL_B_FREEZING       = 'F';
+const unsigned char CELL_SYMBOL_B_TRIPLE_FIRE    = 'P';
+const unsigned char CELL_SYMBOL_B_FAST_RECHARGE  = 'R';
 
 const unsigned char FIRST_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 {
@@ -69,8 +79,8 @@ const unsigned char SECOND_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 	"         X    X                 X XX  XXX  XX X                 X    X         ",
 	"        M      M               XXX   X X X   XXX               M      M        ",
 	"                              XX    X  M  X    XX                              ",
-	"                            XXXM  XX  MMM  XX  MXXX                            ",
-	"                         XXXMM XXX  XX   XX  XXX MMXXX                         ",
+	"                            XXXM  XX  MXM  XX  MXXX                            ",
+	"                         XXXMX XXX  XX   XX  XXX XMXXX                         ",
 	"                        XM XXXX       XXX       XXXX MX                        ",
 	"                       XXXX                         XXXX                       ",
 	"                      M                                 M                      ",
@@ -145,7 +155,6 @@ const unsigned char FOURTH_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 
 
 ///////////////////////////
-// Функции
 unsigned char GetRenderCellSymbol(unsigned char cellSymbol)
 {
 	switch (cellSymbol) {
@@ -153,6 +162,9 @@ unsigned char GetRenderCellSymbol(unsigned char cellSymbol)
 			return 202;
 
 		case CELL_SYMBOL_BULLET :
+			return 179;
+
+		case CELL_SYMBOL_ALIEN_BULLET :
 			return 179;
 
 		case CELL_SYMBOL_ALIEN :
@@ -166,6 +178,18 @@ unsigned char GetRenderCellSymbol(unsigned char cellSymbol)
 
 		case CELL_SYMBOL_ARMORED_ALIEN :
 			return 206;
+
+		case CELL_SYMBOL_SHOOTING_ALIEN :
+			return 210;
+
+		case CELL_SYMBOL_B_FREEZING :
+			return 35;
+
+		case CELL_SYMBOL_B_FAST_RECHARGE :
+			return 60;
+
+		case CELL_SYMBOL_B_TRIPLE_FIRE :
+			return 33;
 	}
 
 	return '?';
@@ -183,6 +207,9 @@ ConsoleColor GetRenderCellSymbolColor(unsigned char cellSymbol)
 		case CELL_SYMBOL_ALIEN :	
 			return ConsoleColor::GREEN;
 
+		case CELL_SYMBOL_ALIEN_BULLET :
+			return ConsoleColor::BLUE;
+
 		case CELL_SYMBOL_MOTHERSHIP_ALIEN :
 			return ConsoleColor::DARK_GREEN;
 
@@ -191,6 +218,18 @@ ConsoleColor GetRenderCellSymbolColor(unsigned char cellSymbol)
 
 		case CELL_SYMBOL_ARMORED_ALIEN :
 			return ConsoleColor::GREEN;
+
+		case CELL_SYMBOL_SHOOTING_ALIEN :
+			return ConsoleColor::GREEN;
+
+		case CELL_SYMBOL_B_FREEZING:
+			return ConsoleColor::WHITE;
+
+		case CELL_SYMBOL_B_FAST_RECHARGE:
+			return ConsoleColor::WHITE;
+
+		case CELL_SYMBOL_B_TRIPLE_FIRE:
+			return ConsoleColor::WHITE;
 	}
 
 	return ConsoleColor::GRAY;
@@ -204,6 +243,15 @@ ConsoleColor GetRenderCellSymbolBackgroundColor(unsigned char cellSymbol)
 
 		case CELL_SYMBOL_ARMORED_ALIEN :
 			return ConsoleColor::DARK_BLUE;
+
+		case CELL_SYMBOL_B_FREEZING:
+			return ConsoleColor::DARK_CYAN;
+
+		case CELL_SYMBOL_B_FAST_RECHARGE:
+			return ConsoleColor::DARK_YELLOW;
+
+		case CELL_SYMBOL_B_TRIPLE_FIRE:
+			return ConsoleColor::DARK_RED;
 	}
 
 	return ConsoleColor::BLACK;

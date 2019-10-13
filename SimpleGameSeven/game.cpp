@@ -25,6 +25,9 @@ Game::Game()
 
 	m_shipFireCooldownTime = 0.0;
 	m_alienAmplitudeTime = 0.0;
+	m_bonusFreezingTime = 0.0;
+	m_bonusFastRechargeTime = 0.0;
+	m_bonusTripleFireTime = 0.0;
 
 	m_gamePoints = 0;
 	m_lastLevelPoints = 0;
@@ -69,7 +72,7 @@ void Game::initialize()
 			}
 
 			switch (cellSymbol) {
-				// Инициализация корабля
+				// Инициализация корабля игрока
 				case CELL_SYMBOL_SHIP : {
 					createObject(GameObjectType::SHIP, (c + 0.5), r,
                                  GetRenderCellSymbol(cellSymbol),
@@ -128,6 +131,39 @@ void Game::initialize()
 	}
 }
 
+void Game::spawnBonus(bool order, GameObject* object)
+{
+	if (!order)
+		return;
+
+	int chance = 1 + rand() % 100;
+
+	if (chance >= 1 && chance < 60) {
+		GameObject* bonus = createObject(GameObjectType::BONUS_FREEZING,
+			                             object->getX(), object->getY(),
+			                             GetRenderCellSymbol(CELL_SYMBOL_B_FREEZING),
+			                             GetRenderCellSymbolColor(CELL_SYMBOL_B_FREEZING),
+			                             GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_B_FREEZING));
+		bonus->setYSpeed(BONUS_SPEED);
+	}
+	else if (chance >= 60 && chance < 90) {
+		GameObject* bonus = createObject(GameObjectType::BONUS_FAST_RECHARGE,
+			                             object->getX(), object->getY(),
+			                             GetRenderCellSymbol(CELL_SYMBOL_B_FAST_RECHARGE),
+			                             GetRenderCellSymbolColor(CELL_SYMBOL_B_FAST_RECHARGE),
+			                             GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_B_FAST_RECHARGE));
+		bonus->setYSpeed(BONUS_SPEED);
+	}
+	else {
+		GameObject* bonus = createObject(GameObjectType::BONUS_TRIPLE_FIRE,
+			                             object->getX(), object->getY(),
+			                             GetRenderCellSymbol(CELL_SYMBOL_B_TRIPLE_FIRE),
+			                             GetRenderCellSymbolColor(CELL_SYMBOL_B_TRIPLE_FIRE),
+			                             GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_B_TRIPLE_FIRE));
+		bonus->setYSpeed(BONUS_SPEED);
+	}
+}
+
 void Game::canIncreaseLevel()
 {
 	if (m_isExitGame) {
@@ -140,6 +176,9 @@ void Game::canIncreaseLevel()
 			m_currentLevel++;
 			m_isGameActive = true;
 			m_lastLevelPoints = m_gamePoints;
+			m_bonusFreezingTime = 0.0;
+			m_bonusFastRechargeTime = 0.0;
+			m_bonusTripleFireTime = 0.0;
 			deleteAllObjects();
 			initialize();
 		}
@@ -190,18 +229,30 @@ void Game::render()
 			objectsCount++;
 		}
 
-	// Вывод счётчика объектов
 	char buff[64];
-	sprintf_s(buff, "Objects: %d", objectsCount);
-	m_renderSystem.drawText(0, 0, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
-
 	// Вывод счётчика кадров
 	sprintf_s(buff, "FPS: %i", m_fps);
-	m_renderSystem.drawText(0, 14, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
+	m_renderSystem.drawText(0, 0, buff, ConsoleColor::DARK_GRAY, ConsoleColor::BLACK);
+
+	// Вывод уведомления о бонусах
+	if (m_bonusFreezingTime > 0.0) {
+		sprintf_s(buff, "Freezing: %i", (int)m_bonusFreezingTime);
+		m_renderSystem.drawText(0, 15, buff, ConsoleColor::BLACK, ConsoleColor::DARK_CYAN);
+	}
+	
+	if (m_bonusFastRechargeTime > 0.0) {
+		sprintf_s(buff, "Fast recharge: %i", (int)m_bonusFastRechargeTime);
+		m_renderSystem.drawText(0, 28, buff, ConsoleColor::BLACK, ConsoleColor::DARK_YELLOW);
+	}
+	
+	if (m_bonusTripleFireTime > 0.0) {
+		sprintf_s(buff, "Triple fire: %i", (int)m_bonusTripleFireTime);
+		m_renderSystem.drawText(0, 46, buff, ConsoleColor::BLACK, ConsoleColor::DARK_RED);
+	}
 
 	// Вывод счётчика игровых очков
 	sprintf_s(buff, "Points: %i", m_gamePoints);
-	m_renderSystem.drawText(0, 65, buff, ConsoleColor::CYAN, ConsoleColor::BLACK);
+	m_renderSystem.drawText(0, 66, buff, ConsoleColor::CYAN, ConsoleColor::BLACK);
 
 	// Конец кадра
 	m_renderSystem.flush();
@@ -219,7 +270,7 @@ void Game::update(float dt)
 			object->update(dt);
 
 			switch (object->getType()) {
-				// Корабль героя
+				// Корабль игрока
 				case GameObjectType::SHIP : {
 					// Захождение за границы
 					if (object->getX() < 0)
@@ -238,15 +289,33 @@ void Game::update(float dt)
 					// Стрельба
 					if (IsKeyDown(VK_SPACE)) {
 						if (m_shipFireCooldownTime <= 0.0) {
-							m_shipFireCooldownTime = SHIP_FIRE_COOLDOWN;
+							if (m_bonusFastRechargeTime > 0.0)
+								m_shipFireCooldownTime = SHIP_FIRE_COOLDOWN / 1.8;
+							else
+								m_shipFireCooldownTime = SHIP_FIRE_COOLDOWN;
 
 							// Инициализация пули
 							GameObject* bullet = createObject(GameObjectType::BULLET,
-								                              object->getX(), object->getY() - 0.5,
+								                              object->getX(), object->getY(),
                                                               GetRenderCellSymbol(CELL_SYMBOL_BULLET),
 				                                              GetRenderCellSymbolColor(CELL_SYMBOL_BULLET),
 						                                      GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_BULLET));
 							bullet->setYSpeed(-BULLET_SPEED);
+							
+							if (m_bonusTripleFireTime > 0.0) {
+								bullet = createObject(GameObjectType::BULLET,
+									                              object->getX() - 1, object->getY() + 1,
+									                              GetRenderCellSymbol(CELL_SYMBOL_BULLET),
+									                              GetRenderCellSymbolColor(CELL_SYMBOL_BULLET),
+									                              GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_BULLET));
+								bullet->setYSpeed(-BULLET_SPEED);
+								bullet = createObject(GameObjectType::BULLET,
+									                              object->getX() + 1, object->getY() + 1,
+									                              GetRenderCellSymbol(CELL_SYMBOL_BULLET),
+									                              GetRenderCellSymbolColor(CELL_SYMBOL_BULLET),
+									                              GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_BULLET));
+								bullet->setYSpeed(-BULLET_SPEED);
+							}
 						}
 					}
 				}
@@ -265,6 +334,7 @@ void Game::update(float dt)
 								// Уничтожение обычного пришельца
 								if (anotherObject->getType() == GameObjectType::ALIEN) {
 									if (anotherObject->intersects(object)) {
+										spawnBonus(anotherObject->canDropBonus(), anotherObject);
 										hitObject(anotherObject);
 										hitObject(object);
 										m_gamePoints += 2;
@@ -301,6 +371,7 @@ void Game::update(float dt)
 										alien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
 										alien->setYSpeed(ALIEN_SPEED);
 										alien->setHealth(HEAVY_ALIEN_HEALTH);
+										spawnBonus(anotherObject->canDropBonus(), anotherObject);
 										hitObject(anotherObject);
 										hitObject(object);
 										m_gamePoints += 5;
@@ -310,6 +381,7 @@ void Game::update(float dt)
 								// Уничтожение/повреждение "тяжёлого" корабля пришельцев
 								if (anotherObject->getType() == GameObjectType::HEAVY_ALIEN) {
 									if (anotherObject->intersects(object)) {
+										spawnBonus(anotherObject->canDropBonus(), anotherObject);
 										hitObject(anotherObject);
 										hitObject(object);
 										m_gamePoints += 4;
@@ -319,6 +391,7 @@ void Game::update(float dt)
 								// Уничтожение/повреждение "бронированного" корабля пришельцев
 								if (anotherObject->getType() == GameObjectType::ARMORED_ALIEN) {
 									if (anotherObject->intersects(object)) {
+										spawnBonus(anotherObject->canDropBonus(), anotherObject);
 										hitObject(anotherObject);
 										hitObject(object);
 										m_gamePoints += 12;
@@ -331,14 +404,76 @@ void Game::update(float dt)
 					break;
 				}
 
+				// Логика бонуса заморозки
+				case GameObjectType::BONUS_FREEZING : {
+					if (object->getY() >= SCREEN_ROWS)
+						hitObject(object);
+					for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++) {
+						GameObject* anotherObject = m_objects[i];
+						if (anotherObject != 0) {
+							if (anotherObject->getType() == GameObjectType::SHIP)
+								if (anotherObject->intersects(object)) {
+									if (m_bonusFreezingTime <= 0.0) {
+										m_bonusFreezingTime = BONUS_FREEZING_TIME;
+											hitObject(object);
+									}
+								}
+						}
+					}
+					break;
+				}
+				// Логика бонуса ускоренной перезарядки
+				case GameObjectType::BONUS_FAST_RECHARGE : {
+					if (object->getY() >= SCREEN_ROWS)
+						hitObject(object);
+					for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++) {
+						GameObject* anotherObject = m_objects[i];
+						if (anotherObject != 0) {
+							if (anotherObject->getType() == GameObjectType::SHIP)
+								if (anotherObject->intersects(object)) {
+									if (m_bonusFastRechargeTime <= 0.0) {
+										m_bonusFastRechargeTime = BONUS_FAST_RECHARGE_TIME;
+										hitObject(object);
+									}
+								}
+						}
+					}
+					break;
+				}
+			    // Логика бонуса "тройного огня"
+				case GameObjectType::BONUS_TRIPLE_FIRE : {
+					if (object->getY() >= SCREEN_ROWS)
+						hitObject(object);
+					for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++) {
+						GameObject* anotherObject = m_objects[i];
+						if (anotherObject != 0) {
+							if (anotherObject->getType() == GameObjectType::SHIP)
+								if (anotherObject->intersects(object)) {
+									if (m_bonusTripleFireTime <= 0.0) {
+										m_bonusTripleFireTime = BONUS_TRIPLE_FIRE_TIME;
+										hitObject(object);
+									}
+								}
+						}
+					}
+					break;
+				}
+
                 // Действия для всех кораблей пришельцев
-				default: {
+				default : {
 					haveAliveAliens = true;
 
 					if (object->getY() >= SCREEN_ROWS - 1)
 						m_isLosing = true;
 					else
-						object->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+						if (m_bonusFreezingTime > 0.0) {
+							object->setXSpeed(0.0);
+							object->setYSpeed(0.0);
+						}
+						else {
+							object->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+							object->setYSpeed(ALIEN_SPEED);
+						}
 					break;
 				}
 			}
@@ -348,10 +483,22 @@ void Game::update(float dt)
 	// Перезарядка орудия
 	if (m_shipFireCooldownTime > 0.0)
 		m_shipFireCooldownTime -= dt;
+	
+	// Отсчёт времени действия бонусов
+	if (m_bonusFreezingTime > 0.0)
+		m_bonusFreezingTime -= dt;
+	
+	if (m_bonusFastRechargeTime > 0.0)
+		m_bonusFastRechargeTime -= dt;
+	
+	if (m_bonusTripleFireTime > 0.0)
+		m_bonusTripleFireTime -= dt;
 
 	// Время колебательного движения пришельцев
-	m_alienAmplitudeTime += dt;
+	if (m_bonusFreezingTime <= 0.0)
+		m_alienAmplitudeTime += dt;
 
+	// Выход из игры по ESC
 	if (IsKeyDown(VK_ESCAPE))
 		m_isExitGame = true;
 

@@ -8,10 +8,15 @@ enum class GameObjectType
 	NONE,
 	SHIP,
 	BULLET,
+	ALIEN_BULLET,
 	ALIEN,
 	MOTHERSHIP_ALIEN,
 	HEAVY_ALIEN,
-	ARMORED_ALIEN
+	ARMORED_ALIEN,
+	SHOOTING_ALIEN,
+	BONUS_FREEZING,
+	BONUS_TRIPLE_FIRE,
+	BONUS_FAST_RECHARGE
 };
 
 
@@ -24,6 +29,7 @@ class GameObject
 	    void update(float dt);
 
 	    bool intersects(GameObject* object);
+		bool canDropBonus();
 
 		// Методы оперирования над членами класса
 	    void setType(GameObjectType type) { m_type = type; }

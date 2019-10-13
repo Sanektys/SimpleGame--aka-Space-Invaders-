@@ -63,3 +63,29 @@ bool GameObject::intersects(GameObject* object)
 
 	return false;
 }
+
+bool GameObject::canDropBonus()
+{
+	if (m_type == GameObjectType::ALIEN) {
+		int chance = 1 + rand() % 100;
+		if (chance == 1)
+			return true;
+	}
+	if (m_type == GameObjectType::MOTHERSHIP_ALIEN) {
+		int chance = 1 + rand() % 75;
+		if (chance == 1)
+			return true;
+	}
+	if (m_type == GameObjectType::HEAVY_ALIEN) {
+		int chance = 1 + rand() % 42;
+		if (chance == 1)
+			return true;
+	}
+	if (m_type == GameObjectType::ARMORED_ALIEN) {
+		int chance = 1 + rand() % 16;
+		if (chance == 1)
+			return true;
+	}
+
+	return false;
+}
