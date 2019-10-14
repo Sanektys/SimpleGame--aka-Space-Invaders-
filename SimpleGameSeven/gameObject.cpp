@@ -86,6 +86,11 @@ bool GameObject::canDropBonus()
 		if (chance == 1)
 			return true;
 	}
+	if (m_type == GameObjectType::SHOOTING_ALIEN) {
+		int chance = 1 + rand() % 2;
+		if (chance == 1)
+			return true;
+	}
 
 	return false;
 }

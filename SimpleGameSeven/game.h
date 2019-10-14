@@ -50,6 +50,7 @@ class Game
 	    GameObject* m_objects[GAME_OBJECTS_COUNT_MAX];
 
 	    float m_shipFireCooldownTime;
+		float m_alienFireCooldownTime;
 	    float m_alienAmplitudeTime;
 		float m_bonusFreezingTime;
 		float m_bonusFastRechargeTime;

@@ -10,9 +10,12 @@ const int LEVEL_COLUMNS = SCREEN_COLUMNS;
 const int LEVELS_NUMBER = 4;
 
 const float SHIP_SPEED         = 28.6;
+
 const float SHIP_FIRE_COOLDOWN = 0.2;
+const float ALIEN_FIRE_COOLDOWN = 1.2;
 
 const float BULLET_SPEED = 40.0;
+const float ALIEN_BULLET_SPEED = 16.8;
 
 const float BONUS_SPEED  = 1.6;
 const float BONUS_FREEZING_TIME = 8.0;
@@ -69,7 +72,7 @@ const unsigned char FIRST_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 const unsigned char SECOND_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 {
 	"                                                                               ",
-	"     XX  XXXXXX  XX          XXXX XX       XX XXXX          XX  XXXXXX  XX     ",
+	"     XX  XXGGXX  XX          XXXX XX       XX XXXX          XX  XXGGXX  XX     ",
 	"       XXX    XXX              XXX  XX   XX  XXX              XXX    XXX       ",
 	"        XX    XX                 X    X X    X                 XX    XX        ",
 	"         MX  XM                  XX    X    XX                  MX  XM         ",
@@ -98,9 +101,9 @@ const unsigned char SECOND_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 const unsigned char THIRD_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 {
 	"                                                                               ",
-	"                              XXXXXXHHXHXHHXXXXXX                              ",
-	"                    XXXXXXXXXXHHH             HHHXXXXXXXXXX                    ",
-	"            XXXXXXXXHH                HHH                HHXXXXXXXX            ",
+	"                              XXXXXXHHXGXHHXXXXXX                              ",
+	"                    XXXXXXGXXXHHH             HHHXXXGXXXXXX                    ",
+	"            XXXXGXXXHH                HHH                HHXXXGXXXX            ",
 	"      XXXXXXHH           HHH        HHTTTHH        HHH           HHXXXXXX      ",
 	"                        HHTHH      HTT   TTH      HHTHH                        ",
 	"          XXXXXHHH     HTT TTH     T T   T T     HTT TTH     HHHXXXXX          ",
@@ -129,13 +132,13 @@ const unsigned char FOURTH_LEVEL_DATA[LEVEL_ROWS][LEVEL_COLUMNS + 1] =
 	"                                                                               ",
 	"                                    HT   TH                                    ",
 	"                                    H THT H                                    ",
-	"                          HHHHHHH  H   T   H  HHHHHHH                          ",
+	"                          HHHHGHH  H   T   H  HHGHHHH                          ",
 	"                       HHHH     HHH    H    HHH     HHHH                       ",
-	"                    HHH            H  T T  H            HHH                    ",
+	"                    HGH            H  T T  H            HGH                    ",
 	"                  HH                HT   TH                HH                  ",
 	"                 H        HHHHHHH     TTT     HHHHHHH        H                 ",
 	"                H      HHHH     HHH         HHH     HHHH      H                ",
-	"               H      HHH         HMM     MMH         HHH      H               ",
+	"               G      HHH         HMM     MMH         HHH      G               ",
 	"               H     HH            H M   M H            HH     H               ",
 	"              H     HH              H  T  H              HH     H              ",
 	"             H     H                H T T H                H     H             ",
@@ -208,7 +211,7 @@ ConsoleColor GetRenderCellSymbolColor(unsigned char cellSymbol)
 			return ConsoleColor::GREEN;
 
 		case CELL_SYMBOL_ALIEN_BULLET :
-			return ConsoleColor::BLUE;
+			return ConsoleColor::MAGENTA;
 
 		case CELL_SYMBOL_MOTHERSHIP_ALIEN :
 			return ConsoleColor::DARK_GREEN;

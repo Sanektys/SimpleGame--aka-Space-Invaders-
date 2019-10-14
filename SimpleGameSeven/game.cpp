@@ -24,6 +24,7 @@ Game::Game()
 		m_objects[i] = 0;
 
 	m_shipFireCooldownTime = 0.0;
+	m_alienFireCooldownTime = 0.0;
 	m_alienAmplitudeTime = 0.0;
 	m_bonusFreezingTime = 0.0;
 	m_bonusFastRechargeTime = 0.0;
@@ -124,6 +125,17 @@ void Game::initialize()
 					armoredAlien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
 					armoredAlien->setYSpeed(ALIEN_SPEED);
 					armoredAlien->setHealth(ARMORED_ALIEN_HEALTH);
+					break;
+				}
+
+				// Инициализация стреляющего пришельца
+				case CELL_SYMBOL_SHOOTING_ALIEN : {
+					GameObject* shootingAlien = createObject(GameObjectType::SHOOTING_ALIEN, (c + 0.5), r,
+						                                     GetRenderCellSymbol(cellSymbol),
+						                                     GetRenderCellSymbolColor(cellSymbol),
+						                                     GetRenderCellSymbolBackgroundColor(cellSymbol));
+					shootingAlien->setXSpeed(ALIEN_AMPLITUDE * cos(m_alienAmplitudeTime));
+					shootingAlien->setYSpeed(ALIEN_SPEED);
 					break;
 				}
 			}
@@ -322,9 +334,8 @@ void Game::update(float dt)
 
 				// Пуля
 				case GameObjectType::BULLET : {
-					if (object->getY() < 0) {
+					if (object->getY() < 0)
 						hitObject(object);
-					}
 					else {
 						for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++) {
 							GameObject* anotherObject = m_objects[i];
@@ -398,6 +409,39 @@ void Game::update(float dt)
 										break;
 									}
 								}
+								// Уничтожение "стреляющего" корабля пришельцев
+								if (anotherObject->getType() == GameObjectType::SHOOTING_ALIEN) {
+									if (anotherObject->intersects(object)) {
+										spawnBonus(anotherObject->canDropBonus(), anotherObject);
+										hitObject(anotherObject);
+										hitObject(object);
+										m_gamePoints += 20;
+										break;
+									}
+								}
+							}
+						}
+					}
+					break;
+				}
+
+				// Пуля пришельца
+				case GameObjectType::ALIEN_BULLET : {
+					if (object->getY() > SCREEN_ROWS)
+						hitObject(object);
+					else {
+						// Уничтожение корабля игрока при соприкосновении
+						for (int i = 0; i < GAME_OBJECTS_COUNT_MAX; i++) {
+							GameObject* anotherObject = m_objects[i];
+							if (anotherObject != 0) {
+								if (anotherObject->getType() == GameObjectType::SHIP) {
+									if (anotherObject->intersects(object)) {
+										hitObject(anotherObject);
+										hitObject(object);
+										m_isLosing = true;
+										break;
+									}
+								}
 							}
 						}
 					}
@@ -463,6 +507,22 @@ void Game::update(float dt)
 				default : {
 					haveAliveAliens = true;
 
+					// Расчёт вероятности выстрела для "стреляющего" пришельца
+					if (object->getType() == GameObjectType::SHOOTING_ALIEN) {
+						if (m_alienFireCooldownTime <= 0.0) {
+							int potentiallyShoot = 1 + rand() % 20;
+							if (potentiallyShoot == 1) {
+								m_alienFireCooldownTime = ALIEN_FIRE_COOLDOWN;
+								GameObject* alienBullet = createObject(GameObjectType::ALIEN_BULLET,
+									object->getX(), object->getY(),
+									GetRenderCellSymbol(CELL_SYMBOL_ALIEN_BULLET),
+									GetRenderCellSymbolColor(CELL_SYMBOL_ALIEN_BULLET),
+									GetRenderCellSymbolBackgroundColor(CELL_SYMBOL_ALIEN_BULLET));
+								alienBullet->setYSpeed(ALIEN_BULLET_SPEED);
+							}
+						}
+					}
+
 					if (object->getY() >= SCREEN_ROWS - 1)
 						m_isLosing = true;
 					else
@@ -495,8 +555,11 @@ void Game::update(float dt)
 		m_bonusTripleFireTime -= dt;
 
 	// Время колебательного движения пришельцев
-	if (m_bonusFreezingTime <= 0.0)
+	// с временем перезарядки оружия
+	if (m_bonusFreezingTime <= 0.0) {
 		m_alienAmplitudeTime += dt;
+		m_alienFireCooldownTime -= dt;
+	}
 
 	// Выход из игры по ESC
 	if (IsKeyDown(VK_ESCAPE))
